@@ -56,9 +56,8 @@ function getFixture() {
 function setupTest() {
   const fixture = getFixture();
   const root = fixture.querySelector('.mdc-top-app-bar');
-  const adjust = fixture.querySelector('.mdc-top-app-bar-fixed-adjust');
   const component = new MDCTopAppBar(root);
-  return {root, adjust, component};
+  return {root, component};
 }
 
 suite('MDCTopAppBar');
@@ -111,4 +110,46 @@ test('#adapter.deregisterNavigationIconInteractionHandler removes a handler from
   component.getDefaultFoundation().adapter_.deregisterNavigationIconInteractionHandler('click', handler);
   domEvents.emit(icon, 'click');
   td.verify(handler(td.matchers.anything()), {times: 0});
+});
+
+test('#adapter.registerScrollHandler adds a scroll handler to the window ' +
+  'element for a given event', () => {
+  const {component} = setupTest();
+  const handler = td.func('scrollHandler');
+  component.getDefaultFoundation().adapter_.registerScrollHandler(handler);
+
+  domEvents.emit(window, 'scroll');
+  try {
+    td.verify(handler(td.matchers.anything()));
+  } finally {
+    // Just to be safe
+    window.removeEventListener('resize', handler);
+  }
+});
+
+test('#adapter.deregisterScrollHandler removes a scroll handler from the window ' +
+  'element for a given event', () => {
+  const {component} = setupTest();
+  const handler = td.func('scrollHandler');
+  window.addEventListener('scroll', handler);
+  component.getDefaultFoundation().adapter_.deregisterScrollHandler(handler);
+  domEvents.emit(window, 'scroll');
+  try {
+    td.verify(handler(td.matchers.anything()), {times: 0});
+  } finally {
+    // Just to be safe
+    window.removeEventListener('resize', handler);
+  }
+});
+
+test('adapter#getViewportScrollY returns scroll distance', () => {
+  const {component} = setupTest();
+  assert.equal(component.getDefaultFoundation().adapter_.getViewportScrollY(), window.pageYOffset);
+});
+
+test('adapter#totalActionIcons returns the amount of action icons on the opposite side of the menu', () => {
+  const {root, component} = setupTest();
+  const adapterReturn = component.getDefaultFoundation().adapter_.totalActionIcons();
+  const actual = root.querySelectorAll('.mdc-top-app-bar__icon').length;
+  assert.isTrue(adapterReturn === actual);
 });

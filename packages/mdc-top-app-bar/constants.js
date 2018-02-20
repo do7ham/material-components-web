@@ -22,4 +22,11 @@ const strings = {
   ACTION_ICON_SELECTOR: '.mdc-top-app-bar__icon',
 };
 
-export {strings};
+/** @enum {string} */
+const cssClasses = {
+  SHORT_CLASS: 'mdc-top-app-bar--short',
+  RIGHT_ICON_CLASS: 'mdc-top-app-bar--short__right-icon',
+  SHORT_CLOSED_CLASS: 'mdc-top-app-bar--short-closed',
+};
+
+export {strings, cssClasses};
